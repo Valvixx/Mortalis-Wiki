@@ -11,7 +11,7 @@ window.WIKI_CONFIG = {
   repo: "Mortalis-Wiki",
 
   // Ветка, из которой публикуется сайт (обычно main)
-  branch: "main",
+  branch: "master",
 
   // Папка внутри репозитория, где лежат .md файлы из Obsidian
   contentDir: "content",
