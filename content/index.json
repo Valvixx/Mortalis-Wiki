@@ -1,0 +1,51 @@
+﻿{
+    "notes":  [
+                  {
+                      "path":  "content/Mortalis\\Введение\\Введение-Оглавление.md",
+                      "relative":  "Mortalis\\Введение\\Введение-Оглавление.md",
+                      "title":  "Введение-Оглавление",
+                      "folder":  ""
+                  },
+                  {
+                      "path":  "content/Mortalis\\Введение\\Излом.md",
+                      "relative":  "Mortalis\\Введение\\Излом.md",
+                      "title":  "Излом",
+                      "folder":  ""
+                  },
+                  {
+                      "path":  "content/Mortalis\\Введение\\Кто я.md",
+                      "relative":  "Mortalis\\Введение\\Кто я.md",
+                      "title":  "Кто я",
+                      "folder":  ""
+                  },
+                  {
+                      "path":  "content/Mortalis\\Введение\\Магия.md",
+                      "relative":  "Mortalis\\Введение\\Магия.md",
+                      "title":  "Магия",
+                      "folder":  ""
+                  },
+                  {
+                      "path":  "content/Mortalis\\Введение\\Народы.md",
+                      "relative":  "Mortalis\\Введение\\Народы.md",
+                      "title":  "Народы",
+                      "folder":  ""
+                  },
+                  {
+                      "path":  "content/Mortalis\\Введение\\Очаги.md",
+                      "relative":  "Mortalis\\Введение\\Очаги.md",
+                      "title":  "Очаги",
+                      "folder":  ""
+                  },
+                  {
+                      "path":  "content/Mortalis\\Введение\\Религия.md",
+                      "relative":  "Mortalis\\Введение\\Религия.md",
+                      "title":  "Религия",
+                      "folder":  ""
+                  }
+              ],
+    "assets":  [
+                   "content/Mortalis\\images\\Pasted image 20260731184623.png",
+                   "content/Mortalis\\images\\Pasted image 20260807145335.png",
+                   "content/Mortalis\\images\\Pasted image 20260807154110.png"
+               ]
+}

@@ -15,8 +15,9 @@ let assetsByBasename = new Map();
 let activeSearchQuery = "";
 
 function safeDecode(value) { try { return decodeURIComponent(value); } catch { return value; } }
-function rawUrl(path) {
-  return `https://raw.githubusercontent.com/${CFG.owner}/${CFG.repo}/${CFG.branch}/${path.split("/").map(encodeURIComponent).join("/")}`;
+function contentUrl(path) {
+  // Обычный файл GitHub Pages: не требует запросов к API и не попадает под rate limit.
+  return path.split("/").map(encodeURIComponent).join("/");
 }
 function escapeHtml(value) {
   const el = document.createElement("div"); el.textContent = String(value); return el.innerHTML;
@@ -26,24 +27,18 @@ function escapeRegExp(value) { return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&
 function setStatus(text, error = false) { els.status.textContent = text; els.status.classList.toggle("error", error); }
 
 async function fetchFileTree() {
-  const url = `https://api.github.com/repos/${CFG.owner}/${CFG.repo}/git/trees/${CFG.branch}?recursive=1`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`GitHub API вернул ${response.status}`);
-  const prefix = `${CFG.contentDir.replace(/\/$/, "")}/`;
-  const entries = (await response.json()).tree.filter(item => item.type === "blob" && item.path.startsWith(prefix));
+  const response = await fetch(contentUrl(`${CFG.contentDir}/index.json`));
+  if (!response.ok) throw new Error(`Не удалось загрузить индекс хранилища (${response.status})`);
+  const index = await response.json();
   assetsByRelPath = new Map(); assetsByBasename = new Map();
-  return entries.flatMap(item => {
-    const relative = item.path.slice(prefix.length);
-    if (!relative.toLowerCase().endsWith(".md")) {
-      const lower = relative.toLowerCase();
-      assetsByRelPath.set(lower, item.path);
-      const basename = lower.split("/").pop();
-      assetsByBasename.set(basename, [...(assetsByBasename.get(basename) || []), item.path]);
-      return [];
-    }
-    const parts = relative.split("/");
-    return [{ path: item.path, relative, title: parts.at(-1).replace(/\.md$/i, ""), folder: parts.slice(0, -1).join("/") }];
+  (index.assets || []).forEach(path => {
+    const relative = path.replace(new RegExp(`^${CFG.contentDir}/`, "i"), "");
+    const lower = relative.toLowerCase();
+    assetsByRelPath.set(lower, path);
+    const basename = lower.split("/").pop();
+    assetsByBasename.set(basename, [...(assetsByBasename.get(basename) || []), path]);
   });
+  return index.notes || [];
 }
 
 function buildIndex(notes) {
@@ -100,7 +95,7 @@ function stripLeadingTitle(md, title) {
 function preprocessStandardImages(md) {
   return md.replace(/!\[([^\]]*)\]\(([^)\s]+)(\s+"[^"]*")?\)/g, (whole, alt, path, title) => {
     if (/^([a-z]+:)?\/\//i.test(path) || path.startsWith("data:")) return whole;
-    return `![${alt}](${rawUrl(resolveAssetPath(path))}${title || ""})`;
+    return `![${alt}](${contentUrl(resolveAssetPath(path))}${title || ""})`;
   });
 }
 function preprocessWikiLinks(md) {
@@ -113,7 +108,7 @@ function preprocessWikiLinks(md) {
     const size = options.find(option => /^\d+(?:\s*x\s*\d+)?$/i.test(option));
     const [width, height] = size ? size.split(/\s*x\s*/i) : [];
     const alt = options.find(option => option !== size) || target.split("/").pop();
-    return `<img src="${rawUrl(resolveAssetPath(target))}" alt="${escapeAttr(alt)}" loading="lazy"${width ? ` width="${width}"` : ""}${height ? ` height="${height}"` : ""}>`;
+    return `<img src="${contentUrl(resolveAssetPath(target))}" alt="${escapeAttr(alt)}" loading="lazy"${width ? ` width="${width}"` : ""}${height ? ` height="${height}"` : ""}>`;
   }).replace(/\[\[([^\]|#]+?)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g, (_, target, alias) => {
     const clean = target.trim(); const known = notesByKey.has(clean.toLowerCase());
     return `<a href="#/${encodeURIComponent(clean)}"${known ? "" : ' class="wiki-link-missing"'}>${escapeHtml((alias || clean).trim())}</a>`;
@@ -144,7 +139,7 @@ async function loadNote(title) {
   const note = notesByKey.get(title.toLowerCase()); els.content.classList.add("loading");
   if (!note) { els.content.innerHTML = `<div class="not-found"><div class="note-eyebrow">Утрачено</div><h1 class="note-title">Страница не найдена</h1><p>Заметка «${escapeHtml(title)}» отсутствует в хранилище.</p></div>`; els.content.classList.remove("loading"); return; }
   try {
-    const response = await fetch(rawUrl(note.path)); if (!response.ok) throw new Error(`Не удалось получить файл (${response.status})`);
+    const response = await fetch(contentUrl(note.path)); if (!response.ok) throw new Error(`Не удалось получить файл (${response.status})`);
     let md = await response.text(); noteContentCache.set(note.path, md.toLowerCase());
     md = preprocessWikiLinks(preprocessStandardImages(stripLeadingTitle(stripFrontMatter(md), note.title)));
     const body = marked.parse(md, { gfm: true, breaks: true, mangle: false, headerIds: true });
@@ -169,7 +164,7 @@ els.content.addEventListener("click", () => els.sidebar.classList.remove("open")
 
 async function prefetchAllContent(notes, concurrency = 5) {
   let cursor = 0, done = 0;
-  async function worker() { while (cursor < notes.length) { const note = notes[cursor++]; try { if (!noteContentCache.has(note.path)) { const r = await fetch(rawUrl(note.path)); if (r.ok) noteContentCache.set(note.path, (await r.text()).toLowerCase()); } } catch {} done++; } }
+  async function worker() { while (cursor < notes.length) { const note = notes[cursor++]; try { if (!noteContentCache.has(note.path)) { const r = await fetch(contentUrl(note.path)); if (r.ok) noteContentCache.set(note.path, (await r.text()).toLowerCase()); } } catch {} done++; } }
   await Promise.all(Array.from({ length: concurrency }, worker));
   setStatus(`${notes.length} заметок в хранилище — поиск по содержимому готов`);
   if (activeSearchQuery) renderTree(activeSearchQuery);
