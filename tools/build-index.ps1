@@ -4,7 +4,7 @@ $contentRoot = Join-Path $projectRoot "content"
 $notes = Get-ChildItem -LiteralPath $contentRoot -Recurse -File -Filter "*.md" |
   Sort-Object FullName |
   ForEach-Object {
-    $relative = $_.FullName.Substring($contentRoot.Length + 1).Replace("\\", "/")
+    $relative = $_.FullName.Substring($contentRoot.Length + 1).Replace("\", "/")
     $parts = $relative.Split("/")
     [ordered]@{
       path = "content/$relative"
@@ -17,7 +17,7 @@ $notes = Get-ChildItem -LiteralPath $contentRoot -Recurse -File -Filter "*.md" |
 $assets = Get-ChildItem -LiteralPath $contentRoot -Recurse -File |
   Where-Object { $_.Extension -ine ".md" -and $_.Name -ne "index.json" } |
   Sort-Object FullName |
-  ForEach-Object { "content/" + $_.FullName.Substring($contentRoot.Length + 1).Replace("\\", "/") }
+  ForEach-Object { "content/" + $_.FullName.Substring($contentRoot.Length + 1).Replace("\", "/") }
 
 [ordered]@{ notes = @($notes); assets = @($assets) } |
   ConvertTo-Json -Depth 4 |

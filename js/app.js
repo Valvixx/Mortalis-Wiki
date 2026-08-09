@@ -17,7 +17,7 @@ let activeSearchQuery = "";
 function safeDecode(value) { try { return decodeURIComponent(value); } catch { return value; } }
 function contentUrl(path) {
   // Обычный файл GitHub Pages: не требует запросов к API и не попадает под rate limit.
-  return path.split("/").map(encodeURIComponent).join("/");
+  return path.replace(/\\/g, "/").split("/").map(encodeURIComponent).join("/");
 }
 function escapeHtml(value) {
   const el = document.createElement("div"); el.textContent = String(value); return el.innerHTML;
