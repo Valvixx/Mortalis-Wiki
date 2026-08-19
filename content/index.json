@@ -47,6 +47,12 @@
                       "relative":  "Mortalis/Введение/Государства/Дальтер/Священное королевство Дальтер.md",
                       "title":  "Священное королевство Дальтер",
                       "folder":  "Mortalis/Государства"
+                  },
+                  {
+                      "path":  "content/Mortalis/Религия/Толусианство.md",
+                      "relative":  "Mortalis/Религия/Толусианство.md",
+                      "title":  "Толусианство",
+                      "folder":  "Mortalis/Религия"
                   }
               ],
     "assets":  [
