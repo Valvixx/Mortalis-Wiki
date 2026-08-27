@@ -52,7 +52,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid 
 .tree-empty { padding: 1rem .5rem; color: var(--muted); font-style: italic; }
 .search-summary { margin: -.5rem .2rem .9rem; color: var(--muted); font-size: .9rem; }
 
-.content { width: 100%; max-width: 1120px; padding: clamp(2rem,5vw,4.5rem) clamp(1.25rem,6vw,6rem) 5rem; }
+.content { width: 100%; max-width: 1480px; padding: clamp(2rem,5vw,4.5rem) clamp(1.25rem,5vw,4rem) 5rem; }
 .content.loading { opacity: .55; }
 .loading-note { color: var(--muted); font: 600 1.1rem var(--font-heading); }
 .note-banner { position: relative; margin-bottom: 2.5rem; padding: 0 2rem 1.25rem 0; border-bottom: 1px solid var(--line); }
