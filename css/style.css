@@ -59,11 +59,11 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid 
 .note-banner::after { right: .3rem; bottom: 1.05rem; }
 .note-eyebrow { color: var(--brass); font: 500 .72rem var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
 .note-title { margin: .28rem 0 0; color: var(--ivory); font: 700 clamp(2.15rem,5vw,3.6rem)/1.08 var(--font-heading); letter-spacing: .02em; }
-.note-body { overflow-wrap: break-word; }
+.note-body { min-width: 0; overflow-wrap: break-word; }
 .content h1, .content h2, .content h3, .content h4 { color: var(--ivory); font-family: var(--font-heading); line-height: 1.16; scroll-margin-top: 1.5rem; }
 .content h2 { margin: 2.5em 0 .75em; padding-bottom: .35em; color: #d6b67d; border-bottom: 1px solid var(--line); font-size: 1.65rem; }
 .content h3 { margin-top: 2em; font-size: 1.3rem; }
-.content p, .content ul, .content ol, .content blockquote { max-width: 100ch; }
+.content p, .content ul, .content ol, .content blockquote { max-width: none; }
 .content p { margin: 1em 0; white-space: normal; }
 .content br { display: block; content: ""; margin-top: .45em; }
 .content ul, .content ol { padding-left: 1.4em; }
@@ -74,7 +74,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid 
 .content pre { max-width: 100%; overflow-x: auto; padding: 1rem; background: var(--paper); border: 1px solid var(--line); }
 .content pre code { border: 0; padding: 0; }
 .content img { max-width: 100%; height: auto; border: 1px solid var(--line); }
-.content table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+.content table { display: block; width: 100%; max-width: 100%; overflow-x: auto; border-collapse: collapse; -webkit-overflow-scrolling: touch; }
 .content th, .content td { padding: .45em .7em; border: 1px solid var(--line); text-align: left; }
 .content th { color: var(--ivory); background: var(--paper); font-family: var(--font-heading); }
 .content hr { border: 0; border-top: 1px solid var(--line); margin: 3em 0; }
@@ -85,4 +85,5 @@ mark.search-hit { padding: 0 .08em; color: var(--ivory); background: var(--wine)
 
 .statusbar { position: relative; z-index: 2; padding: .5rem clamp(1.2rem,4vw,3.5rem); color: var(--muted); border-top: 1px solid var(--line); background: var(--stone); font: .72rem var(--font-mono); }
 .statusbar .error { color: var(--wine-light); }
-@media (max-width: 860px) { .icon-btn { display: inline-block; } .layout { grid-template-columns: 1fr; } .sidebar { position: fixed; z-index: 5; inset: 0 auto 0 0; width: min(84vw,320px); transform: translateX(-100%); transition: transform .2s ease; box-shadow: 10px 0 28px #000; } .sidebar.open { transform: translateX(0); } .content { padding-top: 2rem; } }
+@media (max-width: 860px) { .icon-btn { display: inline-block; } .layout { grid-template-columns: minmax(0, 1fr); } .sidebar { position: fixed; z-index: 5; inset: 0 auto 0 0; width: min(84vw,320px); transform: translateX(-100%); transition: transform .2s ease; box-shadow: 10px 0 28px #000; } .sidebar.open { transform: translateX(0); } .content { min-width: 0; padding-top: 2rem; } }
+@media (max-width: 520px) { body { font-size: 18px; } .topbar { min-height: 64px; } .wordmark { font-size: 1.65rem; } .content { padding: 1.5rem 1rem 4rem; } .note-banner { margin-bottom: 1.75rem; padding-right: 1.2rem; } .note-title { font-size: 2rem; } .content th, .content td { padding: .38em .55em; } }
