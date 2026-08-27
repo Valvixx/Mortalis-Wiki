@@ -19,7 +19,19 @@ $assets = Get-ChildItem -LiteralPath $contentRoot -Recurse -File |
   Sort-Object FullName |
   ForEach-Object { "content/" + $_.FullName.Substring($contentRoot.Length + 1).Replace("\", "/") }
 
-[ordered]@{ notes = @($notes); assets = @($assets) } |
+$repositoryUpdatedAt = $null
+try {
+  $repositoryUpdatedAt = (& git -C $projectRoot log -1 --format=%cI 2>$null)
+} catch {}
+
+[ordered]@{
+  meta = [ordered]@{
+    generatedAt = (Get-Date).ToString("o")
+    repositoryUpdatedAt = $repositoryUpdatedAt
+  }
+  notes = @($notes)
+  assets = @($assets)
+} |
   ConvertTo-Json -Depth 4 |
   Set-Content -LiteralPath (Join-Path $contentRoot "index.json") -Encoding utf8
 

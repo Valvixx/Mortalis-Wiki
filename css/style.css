@@ -83,7 +83,10 @@ mark.search-hit { padding: 0 .08em; color: var(--ivory); background: var(--wine)
 .search-hit.current { outline: 1px solid #e3c17f; }
 .search-result-count { margin: -1.5rem 0 2.1rem; color: var(--muted); font-size: 1rem; }
 
-.statusbar { position: relative; z-index: 2; padding: .5rem clamp(1.2rem,4vw,3.5rem); color: var(--muted); border-top: 1px solid var(--line); background: var(--stone); font: .72rem var(--font-mono); }
+.statusbar { position: relative; z-index: 2; padding: .62rem clamp(1.2rem,4vw,3.5rem); color: var(--muted); border-top: 1px solid var(--line); background: var(--stone); font: .72rem var(--font-mono); }
 .statusbar .error { color: var(--wine-light); }
+.status-stats { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem 1.35rem; }
+.status-stats span { display: inline-flex; align-items: baseline; gap: .35rem; white-space: nowrap; }
+.status-stats b { color: var(--brass); font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
 @media (max-width: 860px) { .icon-btn { display: inline-block; } .layout { grid-template-columns: minmax(0, 1fr); } .sidebar { position: fixed; z-index: 5; inset: 0 auto 0 0; width: min(84vw,320px); transform: translateX(-100%); transition: transform .2s ease; box-shadow: 10px 0 28px #000; } .sidebar.open { transform: translateX(0); } .content { min-width: 0; padding-top: 2rem; } }
-@media (max-width: 520px) { body { font-size: 18px; } .topbar { min-height: 64px; } .wordmark { font-size: 1.65rem; } .content { padding: 1.5rem 1rem 4rem; } .note-banner { margin-bottom: 1.75rem; padding-right: 1.2rem; } .note-title { font-size: 2rem; } .content th, .content td { padding: .38em .55em; } }
+@media (max-width: 520px) { body { font-size: 18px; } .topbar { min-height: 64px; } .wordmark { font-size: 1.65rem; } .content { padding: 1.5rem 1rem 4rem; } .note-banner { margin-bottom: 1.75rem; padding-right: 1.2rem; } .note-title { font-size: 2rem; } .content th, .content td { padding: .38em .55em; } .status-stats { display: grid; grid-template-columns: 1fr; gap: .35rem; } .status-stats span { white-space: normal; } }

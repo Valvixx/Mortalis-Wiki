@@ -9,7 +9,9 @@ const els = {
 els.title.textContent = CFG.title;
 const notesByKey = new Map();
 const noteContentCache = new Map();
+const noteLengthCache = new Map();
 let allNotes = [];
+let indexMeta = {};
 let assetsByRelPath = new Map();
 let assetsByBasename = new Map();
 let activeSearchQuery = "";
@@ -24,12 +26,33 @@ function escapeHtml(value) {
 }
 function escapeAttr(value) { return escapeHtml(value).replace(/"/g, "&quot;"); }
 function escapeRegExp(value) { return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-function setStatus(text, error = false) { els.status.textContent = text; els.status.classList.toggle("error", error); }
+function formatNumber(value) { return new Intl.NumberFormat("ru-RU").format(value); }
+function formatUpdatedAt(value) {
+  if (!value) return "неизвестно";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(date);
+}
+function setStatus(text, error = false) {
+  els.status.textContent = text;
+  els.status.classList.toggle("error", error);
+  els.status.classList.remove("status-stats");
+}
+function setFooterStats({ fileCount, totalChars, updatedAt }) {
+  els.status.classList.remove("error");
+  els.status.classList.add("status-stats");
+  els.status.innerHTML = `
+    <span><b>Всего файлов:</b> ${formatNumber(fileCount)}</span>
+    <span><b>Всего символов:</b> ${formatNumber(totalChars)}</span>
+    <span><b>Обновлено:</b> ${escapeHtml(formatUpdatedAt(updatedAt))}</span>
+  `;
+}
 
 async function fetchFileTree() {
   const response = await fetch(contentUrl(`${CFG.contentDir}/index.json`));
   if (!response.ok) throw new Error(`Не удалось загрузить индекс хранилища (${response.status})`);
   const index = await response.json();
+  indexMeta = index.meta || {};
   assetsByRelPath = new Map(); assetsByBasename = new Map();
   (index.assets || []).forEach(path => {
     const relative = path.replace(new RegExp(`^${CFG.contentDir}/`, "i"), "");
@@ -140,7 +163,7 @@ async function loadNote(title) {
   if (!note) { els.content.innerHTML = `<div class="not-found"><div class="note-eyebrow">Утрачено</div><h1 class="note-title">Страница не найдена</h1><p>Заметка «${escapeHtml(title)}» отсутствует в хранилище.</p></div>`; els.content.classList.remove("loading"); return; }
   try {
     const response = await fetch(contentUrl(note.path)); if (!response.ok) throw new Error(`Не удалось получить файл (${response.status})`);
-    let md = await response.text(); noteContentCache.set(note.path, md.toLowerCase());
+    let md = await response.text(); noteContentCache.set(note.path, md.toLowerCase()); noteLengthCache.set(note.path, md.length);
     md = preprocessWikiLinks(preprocessStandardImages(stripLeadingTitle(stripFrontMatter(md), note.title)));
     const body = marked.parse(md, { gfm: true, breaks: true, mangle: false, headerIds: true });
     const folder = note.folder ? note.folder.split("/").join(" / ") : "Запись";
@@ -164,9 +187,10 @@ els.content.addEventListener("click", () => els.sidebar.classList.remove("open")
 
 async function prefetchAllContent(notes, concurrency = 5) {
   let cursor = 0, done = 0;
-  async function worker() { while (cursor < notes.length) { const note = notes[cursor++]; try { if (!noteContentCache.has(note.path)) { const r = await fetch(contentUrl(note.path)); if (r.ok) noteContentCache.set(note.path, (await r.text()).toLowerCase()); } } catch {} done++; } }
+  async function worker() { while (cursor < notes.length) { const note = notes[cursor++]; try { if (!noteContentCache.has(note.path)) { const r = await fetch(contentUrl(note.path)); if (r.ok) { const text = await r.text(); noteContentCache.set(note.path, text.toLowerCase()); noteLengthCache.set(note.path, text.length); } } } catch {} done++; } }
   await Promise.all(Array.from({ length: concurrency }, worker));
-  setStatus(`${notes.length} заметок в хранилище — поиск по содержимому готов`);
+  const totalChars = notes.reduce((sum, note) => sum + (noteLengthCache.get(note.path) || noteContentCache.get(note.path)?.length || 0), 0);
+  setFooterStats({ fileCount: notes.length, totalChars, updatedAt: indexMeta.repositoryUpdatedAt || indexMeta.generatedAt });
   if (activeSearchQuery) renderTree(activeSearchQuery);
 }
 (async function init() {
