@@ -11,7 +11,8 @@ const notesByKey = new Map();
 const noteContentCache = new Map();
 const noteLengthCache = new Map();
 let allNotes = [];
-let indexMeta = {};
+let indexUpdatedAt = null;
+let repositoryUpdatedAtPromise = Promise.resolve(null);
 let assetsByRelPath = new Map();
 let assetsByBasename = new Map();
 let activeSearchQuery = "";
@@ -47,12 +48,31 @@ function setFooterStats({ fileCount, totalChars, updatedAt }) {
     <span><b>Обновлено:</b> ${escapeHtml(formatUpdatedAt(updatedAt))}</span>
   `;
 }
+async function fetchRepositoryUpdatedAt() {
+  if (!CFG.owner || !CFG.repo || !CFG.branch) return null;
+  const owner = encodeURIComponent(CFG.owner);
+  const repo = encodeURIComponent(CFG.repo);
+  const branch = encodeURIComponent(CFG.branch);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
+  try {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits/${branch}`, { signal: controller.signal });
+    if (!response.ok) return null;
+    const commit = await response.json();
+    return commit?.commit?.committer?.date || commit?.commit?.author?.date || null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 async function fetchFileTree() {
   const response = await fetch(contentUrl(`${CFG.contentDir}/index.json`));
   if (!response.ok) throw new Error(`Не удалось загрузить индекс хранилища (${response.status})`);
   const index = await response.json();
-  indexMeta = index.meta || {};
+  indexUpdatedAt = response.headers.get("Last-Modified") || index.meta?.generatedAt || null;
+  repositoryUpdatedAtPromise = fetchRepositoryUpdatedAt();
   assetsByRelPath = new Map(); assetsByBasename = new Map();
   (index.assets || []).forEach(path => {
     const relative = path.replace(new RegExp(`^${CFG.contentDir}/`, "i"), "");
@@ -190,7 +210,8 @@ async function prefetchAllContent(notes, concurrency = 5) {
   async function worker() { while (cursor < notes.length) { const note = notes[cursor++]; try { if (!noteContentCache.has(note.path)) { const r = await fetch(contentUrl(note.path)); if (r.ok) { const text = await r.text(); noteContentCache.set(note.path, text.toLowerCase()); noteLengthCache.set(note.path, text.length); } } } catch {} done++; } }
   await Promise.all(Array.from({ length: concurrency }, worker));
   const totalChars = notes.reduce((sum, note) => sum + (noteLengthCache.get(note.path) || noteContentCache.get(note.path)?.length || 0), 0);
-  setFooterStats({ fileCount: notes.length, totalChars, updatedAt: indexMeta.repositoryUpdatedAt || indexMeta.generatedAt });
+  const repositoryUpdatedAt = await repositoryUpdatedAtPromise;
+  setFooterStats({ fileCount: notes.length, totalChars, updatedAt: repositoryUpdatedAt || indexUpdatedAt });
   if (activeSearchQuery) renderTree(activeSearchQuery);
 }
 (async function init() {
