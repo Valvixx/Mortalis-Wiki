@@ -56,6 +56,12 @@
                       "relative":  "Mortalis/Религия/Толусианство.md",
                       "title":  "Толусианство",
                       "folder":  "Mortalis/Религия"
+                  },
+                  {
+                      "path":  "content/Mortalis/Государства/Дальтер/Мальтерхэм.md",
+                      "relative":  "Mortalis/Государства/Дальтер/Мальтерхэм.md",
+                      "title":  "Мальтерхэм",
+                      "folder":  "Mortalis/Государства"
                   }
               ],
     "assets":  [
